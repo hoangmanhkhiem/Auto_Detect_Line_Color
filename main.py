@@ -5,6 +5,7 @@ import numpy as np
 import webcolors
 import re
 import warnings
+from datetime import datetime
 
 warnings.filterwarnings("ignore", category=UserWarning)
 warnings.filterwarnings("ignore", category=RuntimeWarning)
@@ -97,11 +98,15 @@ def draw_multipolygon(mpoly, fill):
         for i, poly in enumerate(mpoly):
             max_distance_between_points(poly)
 
+def current_time():
+    now = datetime.now()
+    current_time_str = now.strftime("%H:%M:%S")
+    return current_time_str
 
 def main():
     path_root = "D:\\svg\\"
     for i in range(6):
-        print("Da chay xong tep thu {}".format(i+1))
+        print("TIME: " + current_time() + "\tINFO: Da chay xong tep thu {}".format(i+1))
         fileName = "neg_" + str(i) + ".svg"
         path = path_root + fileName
         if path is None:
@@ -146,3 +151,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    print("DONE!")
