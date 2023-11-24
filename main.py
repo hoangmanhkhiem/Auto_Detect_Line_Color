@@ -106,31 +106,34 @@ def main():
         path = path_root + fileName
         if path is None:
             raise Exception("Could not file")
-        polys, attrs, svg_size, viewbox = read_svg(path)
-
-        for poly, attr in zip(polys, attrs):
-            if 'style' in attr.keys():
-                attr.update({attrs.split(':')[0]: attrs.split(':')[1] for attrs in attr['style'].split(';')})
-            if 'stroke' not in attr.keys():
-                attr['stroke'] = attr['fill']
-            if 'fill' in attr.keys():
-                if attr['fill'] not in color:
-                    color.append(attr['fill'])
-        for poly, attr in zip(polys, attrs):
-            if 'fill' in attr.keys():
-                draw_multipolygon(poly, fill=attr['fill'])
-        maxx_diss = 0
-        _x = 0
-        _y = 0
-        for pr in Points:
-            if maxx_diss < pr.distance:
-                maxx_diss = pr.distance
-                _x = pr.point1
-                _y = pr.point2
-        name = "neg_" + str(i) + ".jpg"
-        DATA.append(Info(_x,_y,name))
-        color.clear()
-        Points.clear()
+        if read_svg(path) is not None:
+            polys, attrs, svg_size, viewbox = read_svg(path)
+    
+            for poly, attr in zip(polys, attrs):
+                if 'style' in attr.keys():
+                    attr.update({attrs.split(':')[0]: attrs.split(':')[1] for attrs in attr['style'].split(';')})
+                if 'stroke' not in attr.keys():
+                    attr['stroke'] = attr['fill']
+                if 'fill' in attr.keys():
+                    if attr['fill'] not in color:
+                        color.append(attr['fill'])
+            for poly, attr in zip(polys, attrs):
+                if 'fill' in attr.keys():
+                    draw_multipolygon(poly, fill=attr['fill'])
+            maxx_diss = 0
+            _x = 0
+            _y = 0
+            for pr in Points:
+                if maxx_diss < pr.distance:
+                    maxx_diss = pr.distance
+                    _x = pr.point1
+                    _y = pr.point2
+            name = "neg_" + str(i) + ".jpg"
+            DATA.append(Info(_x,_y,name))
+            color.clear()
+            Points.clear()
+        else:
+            DATA.append(Info(None,None,None))
     with open("output.txt","w") as f:
         for x in DATA:
             a = str(x.nd)
