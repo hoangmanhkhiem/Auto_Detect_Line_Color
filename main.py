@@ -31,26 +31,24 @@ class Info:
 
 
 def read_svg(path):
-    paths, attrs, svg_attr = svg2paths2(path)
-    svg_size = (float(svg_attr['width'].replace('px', '')),
-                float(svg_attr['height'].replace('px', '')))
-    viewbox = [float(f) for f in svg_attr['viewBox'].split(' ')]
-
-    polys = []
-    for path in paths:
-        poly = []
-        for subpaths in path.continuous_subpaths():
-            points = []
-            for seg in subpaths:
-                if seg.length() == math.inf * (-1) or seg.length() == math.inf:
-                    break
-                interp_num = ceil(seg.length() / 8)
-                points.append(seg.point(np.arange(interp_num) / interp_num))
-            points = np.concatenate(points)
-            points = np.append(points, points[0])
-            poly.append(points)
-        polys.append([[(p.real, p.imag) for p in pl] for pl in poly])
-    return (polys, attrs, svg_size, viewbox)
+            paths, attrs, svg_attr = svg2paths2(path)
+            svg_size = (float(svg_attr['width'].replace('px', '')),
+                        float(svg_attr['height'].replace('px', '')))
+            polys = []
+            for path in paths:
+                poly = []
+                for subpaths in path.continuous_subpaths():
+                    points = []
+                    for seg in subpaths:
+                        if seg.length() == math.inf * (-1) or seg.length() == math.inf:
+                            break
+                        interp_num = ceil(seg.length() / 8)
+                        points.append(seg.point(np.arange(interp_num) / interp_num))
+                    points = np.concatenate(points)
+                    points = np.append(points, points[0])
+                    poly.append(points)
+                polys.append([[(p.real, p.imag) for p in pl] for pl in poly])
+            return (polys, attrs, svg_size)
 
 
 def distance(point1, point2):
@@ -104,41 +102,47 @@ def current_time():
     return current_time_str
 
 def main():
-    path_root = "D:\\svg\\"
-    for i in range(6):
-        print("TIME: " + current_time() + "\tINFO: Da chay xong tep thu {}".format(i+1))
-        fileName = "neg_" + str(i) + ".svg"
-        path = path_root + fileName
-        if path is None:
-            raise Exception("Could not file")
-        if read_svg(path) is not None:
-            polys, attrs, svg_size, viewbox = read_svg(path)
-    
-            for poly, attr in zip(polys, attrs):
-                if 'style' in attr.keys():
-                    attr.update({attrs.split(':')[0]: attrs.split(':')[1] for attrs in attr['style'].split(';')})
-                if 'stroke' not in attr.keys():
-                    attr['stroke'] = attr['fill']
-                if 'fill' in attr.keys():
-                    if attr['fill'] not in color:
-                        color.append(attr['fill'])
-            for poly, attr in zip(polys, attrs):
-                if 'fill' in attr.keys():
-                    draw_multipolygon(poly, fill=attr['fill'])
-            maxx_diss = 0
-            _x = 0
-            _y = 0
-            for pr in Points:
-                if maxx_diss < pr.distance:
-                    maxx_diss = pr.distance
-                    _x = pr.point1
-                    _y = pr.point2
-            name = "neg_" + str(i) + ".jpg"
-            DATA.append(Info(_x,_y,name))
-            color.clear()
-            Points.clear()
-        else:
-            DATA.append(Info(None,None,None))
+    path_root = "D:\\neg\\"
+    for i in range(400,746):
+        try:
+            fileName = "neg_" + str(i) + ".svg"
+            path = path_root + fileName
+            if path is None:
+                raise Exception("Could not file")
+            if open(path,"r") is None:
+                continue
+            if read_svg(path) is not None:
+                polys, attrs, svg_size = read_svg(path)
+
+                for poly, attr in zip(polys, attrs):
+                    if 'style' in attr.keys():
+                        attr.update({attrs.split(':')[0]: attrs.split(':')[1] for attrs in attr['style'].split(';')})
+                    if 'stroke' not in attr.keys():
+                        attr['stroke'] = attr['fill']
+                    if 'fill' in attr.keys():
+                        if attr['fill'] not in color:
+                            color.append(attr['fill'])
+                for poly, attr in zip(polys, attrs):
+                    if 'fill' in attr.keys():
+                        draw_multipolygon(poly, fill=attr['fill'])
+                maxx_diss = 0
+                _x = 0
+                _y = 0
+                for pr in Points:
+                    if maxx_diss < pr.distance:
+                        maxx_diss = pr.distance
+                        _x = pr.point1
+                        _y = pr.point2
+                name = "neg_" + str(i) + ".jpg"
+                DATA.append(Info(_x,_y,name))
+                color.clear()
+                Points.clear()
+            else:
+                DATA.append(Info(None,None,None))
+            print("TIME: " + current_time() + "\tINFO: Da chay xong tep thu {}".format(i+1))
+        except:
+            print("TIME: " + current_time() + "\tINFO: Loi tep thu {}".format(i+1))
+
     with open("output.txt","w") as f:
         for x in DATA:
             a = str(x.nd)
@@ -151,4 +155,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-    print("DONE!")
